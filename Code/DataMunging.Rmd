@@ -1,0 +1,53 @@
+Scoring Data in R
+===========================
+
+## Looking at Grade Point Average, College Board Score and Highest Math Taken
+## WSJ article:  "For Career Success, Study Those Quadratics"
+## http://blogs.wsj.com/economics/2013/11/01/for-career-success-study-those-quadratics/
+
+Student       | GPA    | College Board | Highest Math
+:------------ | -----: | ------------: | :-----------
+Ally Aardvark | 2.45   | 26            | Algebra
+Billy Bison   | 3.82   | 30            | Calculus
+
+### R code  (based on some code in R in Action)
+
+
+```{r}
+# install.packages("knitr")
+# library(knitr)
+
+Student <- c("Zsuzsa Polgar", "Vishy Anand", "Jose Capablanca", "Hou Yifan", "Magnus Carlsen")
+GPA <- c(1.77, 2.45, 3.82, 2.75, 2.88)
+BoardScore <- c(36, 26, 30, 28, 19)
+
+
+candidates <- data.frame(Student, GPA, BoardScore,
+    stringsAsFactors=FALSE)
+
+z <- scale(candidates[,2:3])
+
+score <- apply(z, 1, mean) 
+
+candidates <- cbind(candidates, score)
+
+y <- quantile(score, c(.8,.6,.4,.2))                                   
+
+candidates$grade[score >= y[1]] <- "A"                                     
+candidates$grade[score < y[1] & score >= y[2]] <- "B"
+candidates$grade[score < y[2] & score >= y[3]] <- "C"
+candidates$grade[score < y[3] & score >= y[4]] <- "D"
+candidates$grade[score < y[4]] <- "F"
+
+name <- strsplit((candidates$Student), " ")                                
+lastname <- sapply(name, "[", 2)
+firstname <- sapply(name, "[", 1)
+
+candidates <- cbind(firstname,lastname, candidates[,-1])
+candidates <- candidates[order(lastname,firstname),]
+
+candidates
+
+```
+
+Your Task:  Build an application that uses some kind of scoring mechanism to normalize data
