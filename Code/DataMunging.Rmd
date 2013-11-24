@@ -50,9 +50,11 @@ candidates
 
 ```
 
+## Assignment 12
+
 Your Task:  Build an application that uses some kind of scoring mechanism to normalize data
 
-
+### Names
 I wanted to create more data so I looked up a list of scientist names and copied those to names.csv
 
 ```{r}
@@ -62,38 +64,49 @@ names <- names[,1]
 names <- strsplit(names, " ")
 firstname <- sapply(names, function(arg) arg[1])
 lastname <- sapply(names, function(arg) arg[length(arg)])
+```
 
+### Create Data
+```{r}
 # Create random data for GPA, BoardScore, and Highest Math
 set.seed(45)
 GPA <- round(runif(length(names), min=0, max=4), digits=2)
 BoardScore <- round(runif(length(names), min=1, max=36), digits=0)
 MathLevels <- c("Algebra 1", "Algebra 2", "Geometry", "Trigonometry", "Calculus")
 HighestMath <- MathLevels[round(runif(length(names), min=1, max=length(MathLevels)), digits=0)]
+```
 
+### Highest Math Score
+```{r}
 # Translate HighestMath into a MathCredit score to be used in ranking
 # As a first pass I'm just going with a linear score
 MathCredit <- sapply(HighestMath, function(arg) as.integer(which(MathLevels == arg)))
 names(MathCredit) <- NULL
+```
 
+### Overall Score
+```{r}
 scores <- cbind(GPA, BoardScore, MathCredit)
 z <- scale(scores[,1:3])
 rank.score <- round(apply(z, 1, mean), digits=2)
-rank.index <- order(rank.score, decreasing=TRUE)
-
-# Assemle this into a data frame
-candidates <- data.frame(cbind(lastname, firstname, GPA, BoardScore, HighestMath, MathCredit, rank.score))
-row.names(candidates) <- NULL
-
-# Add a ranking column
-candidates <- cbind(candidates[rank.index, ], rank=1:dim(candidates[1]))
-
-# Now display ordered by last name
-candidates <- candidates[order(candidates$lastname, candidates$firstname),]
-
-options(width=120)
-candidates
-
+rank <- rep(NA, length(rank.score))
+rank[order(rank.score, decreasing=TRUE)] <- 1:length(rank.score)
 ```
 
-Seeing that Einstein ranked 72 and Hawking ranked 174 this is probably not the most accurate system. ;-)
+### Output
+```{r}
+# Assemle this into a data frame
+candidates <- data.frame(cbind(lastname, firstname, GPA, BoardScore, HighestMath, 
+                               MathCredit, rank.score, rank))
+row.names(candidates) <- NULL
+
+options(width=120)
+# Now display ordered by last name
+candidates[order(lastname, firstname), ]
+
+# We can also look at this by rank
+candidates[order(rank), ]
+```
+
+Seeing that Einstein ranked 74 and Hawking ranked 174 this is probably not the most accurate system. ;-)
 
